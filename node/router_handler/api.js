@@ -3,24 +3,13 @@
  */
 // 导入数据库操作模块
 const sequelize = require('../db/index');
-const { Sequelize, DataTypes, Op } = require('sequelize');
+// const { Sequelize, DataTypes, Op } = require('sequelize');
 const jsonwebtoken = require('jsonwebtoken'); //用来生成token
 const secretKey = 'secret123^_^'; //密钥
 // const { use } = require('../router/user');
-
+const { users } = require('../db/index');
 //
-const users = sequelize.define('users', {
-    id: {
-        type: DataTypes.STRING,
-        primaryKey: true
-    },
-    name: Sequelize.STRING(20),
-    password: Sequelize.STRING(16),
-    phone: Sequelize.STRING(11),
-}, {
-    timestamps: false,
-    freezeTableName: true
-});
+
 // 注册用户的处理函数
 
 function RndNum(n) { //生成随机数

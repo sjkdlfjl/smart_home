@@ -5,6 +5,9 @@ import Sites from '../components/sites/MySites.vue'
 import AddSites from '../components/sites/AddSites.vue'
 import AddRooms from '../components/rooms/AddRooms.vue'
 import Room from '../components/rooms/MyRoom.vue'
+import Light from '../components/devices/MyLight.vue'
+import Sensor from '../components/devices/MySensor.vue'
+import Switch from '../components/devices/MySwitch.vue'
 const router = createRouter({
     history: createWebHashHistory(),
     routes: [
@@ -15,6 +18,9 @@ const router = createRouter({
         { path: '/addSites', component: AddSites, name: 'addSites' },
         { path: '/addRooms/:siteId', component: AddRooms, name: 'addRoomes' },
         { path: '/room/:roomId', component: Room, name: 'room' },
+        { path: '/room/:roomId/light/:deviceId', component: Light, name: 'light' },
+        { path: '/room/:roomId/sensor/:deviceId', component: Sensor, name: 'sensor' },
+        { path: '/room/:roomId/switch/:deviceId', component: Switch, name: 'switch' },
     ],
 })
 

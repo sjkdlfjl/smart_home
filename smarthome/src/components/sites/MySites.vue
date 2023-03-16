@@ -102,5 +102,6 @@ function enterRoom(roomId) {
 
 .full {
   flex-grow: 1;
+  height: 30px;
 }
 </style>

@@ -22,7 +22,7 @@ request.interceptors.request.use(
         return config;
     })
 
-export const post = async(url, data) => {
+export const filePost = async(url, data) => {
     try {
         console.log("post", url, data);
         const response = await request.post(url, data);

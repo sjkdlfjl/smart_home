@@ -24,7 +24,11 @@ router.post("/user/addSite", userHandler.addSite);
 
 router.post("/user/addRoom", userHandler.addRoom);
 
+router.post("/user/addDevice", userHandler.addDevice);
+router.post("/user/storeDevices", userHandler.storeDevices);
+router.post("/user/getDevice", userHandler.getDevice);
+router.post("/user/setDevice", userHandler.setDevice);
 router.post("/upload", controller.upload);
-router.get("/files", controller.getListFiles);
+router.post("/getPic", controller.getPic);
 // 将路由对象共享出去
 module.exports = router

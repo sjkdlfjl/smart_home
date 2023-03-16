@@ -1,30 +1,5 @@
-const sequelize = require('../db/index');
-const { Sequelize, DataTypes, Op } = require('sequelize');
+const { rooms, sites, devices, lights, sensors, switches } = require('../db/index');
 
-const sites = sequelize.define('sites', {
-    id: {
-        type: DataTypes.STRING,
-        primaryKey: true
-    },
-    name: Sequelize.STRING(20),
-    hostName: Sequelize.STRING(20),
-}, {
-    timestamps: false,
-    freezeTableName: true
-});
-
-const rooms = sequelize.define('rooms', {
-    id: {
-        type: DataTypes.STRING,
-        primaryKey: true
-    },
-    name: Sequelize.STRING(20),
-    siteId: Sequelize.STRING(20),
-    pic: Sequelize.STRING(20),
-}, {
-    timestamps: false,
-    freezeTableName: true
-});
 // 注册用户的处理函数
 
 function RndNum(n) { //生成随机数
@@ -95,40 +70,178 @@ exports.addSite = async(req, res) => {
 }
 
 exports.addRoom = async(req, res) => {
-        console.log("addRoom");
-        let siteId = req.body.siteId;
-        let roomName = req.body.roomName;
-        let room = await rooms.findOne({
+    console.log("addRoom");
+    let siteId = req.body.siteId;
+    let roomName = req.body.roomName;
+    let room = await rooms.findOne({
+        where: {
+            siteId: siteId,
+            name: roomName
+        }
+    });
+
+    if (room != null) {
+        res.send({ status: 1, message: '该room已存在' });
+    } else {
+        let id = RndNum(10);
+        let newRoom = await rooms.findOne({
             where: {
-                siteId: siteId,
-                name: roomName
+                id: id
             }
         });
-
-        if (room != null) {
-            res.send({ status: 1, message: '该room已存在' });
-        } else {
-            let id = RndNum(10);
-            let newRoom = await rooms.findOne({
+        while (newRoom != null) {
+            id = RndNum(10);
+            newRoom = await rooms.findOne({
                 where: {
                     id: id
                 }
             });
-            while (newRoom != null) {
-                id = RndNum(10);
-                newRoom = await rooms.findOne({
-                    where: {
-                        id: id
-                    }
-                });
-            }
-            await rooms.create({
-                id: id,
-                name: roomName,
-                siteId: siteId
-            });
-            res.send({ status: 0, message: '添加成功' });
         }
+        await rooms.create({
+            id: id,
+            name: roomName,
+            siteId: siteId
+        });
+        res.send({ status: 0, message: '添加成功' });
+    }
+}
+
+exports.addDevice = async(req, res) => {
+    console.log("addDevice");
+    let roomId = req.body.roomId;
+    let type = req.body.type;
+    console.log(type);
+    let deviceId = RndNum(12);
+    let device = await devices.findOne({
+        where: {
+            id: deviceId
+        }
+    });
+    while (device != null) {
+        deviceId = RndNum(12);
+        device = await devices.findOne({
+            where: {
+                id: deviceId
+            }
+        });
+    }
+    await devices.create({
+        id: deviceId,
+        roomId: roomId,
+        type: type,
+        x: 25,
+        y: 25
+    });
+    switch (type) {
+        case 'Light':
+            await lights.create({
+                id: deviceId,
+                state: false,
+                light: 0
+            });
+            break;
+        case 'Sensor':
+            await sensors.create({
+                id: deviceId,
+                temperature: 26,
+                humidity: 50
+            });
+            break;
+        case 'Switch':
+            await switches.create({
+                id: deviceId,
+                state: false
+            });
+            break;
+        default:
+            console.log("device type error");
+    }
+    res.send({ status: 0, message: '添加成功' });
+}
+
+exports.storeDevices = async(req, res) => {
+    console.log("storeDevices");
+    let devicess = req.body.devices;
+    console.log(req.body.devices);
+    for (let i = 0; i < req.body.devices.length; i++) {
+        let device = req.body.devices[i];
+        let id = device.id;
+        let x = device.x;
+        let y = device.y;
+        await devices.update({
+            x: x,
+            y: y
+        }, {
+            where: {
+                id: id
+            }
+        });
+    }
+    res.send({ status: 0, message: '保存成功' });
+}
+exports.getDevice = async(req, res) => {
+    console.log("getDevice");
+    let id = req.body.id;
+    if (req.body.type == 'Light') {
+        let light = await lights.findOne({
+            where: {
+                id: id
+            }
+        });
+        // console.log("light");
+        res.send({ status: 0, message: '获取成功', device: light });
+    } else if (req.body.type == 'Sensor') {
+        let sensor = await sensors.findOne({
+            where: {
+                id: id
+            }
+        });
+        res.send({ status: 0, message: '获取成功', device: sensor });
+    } else if (req.body.type == 'Switch') {
+        let sw = await switches.findOne({
+            where: {
+                id: id
+            }
+        });
+        res.send({ status: 0, message: '获取成功', device: sw });
+    } else {
+        res.send({ status: 1, message: '获取失败' });
+    }
+}
+exports.setDevice = async(req, res) => {
+        console.log("setDevice");
+        let id = req.body.id;
+        let type = req.body.type;
+        console.log(req.body.state + req.body.light);
+        if (type == "Light") {
+            console.log("light");
+            await lights.update({
+                state: req.body.state,
+                light: req.body.light
+            }, {
+                where: {
+                    id: id
+                }
+            });
+        } else if (type == "Switch") {
+            await switches.update({
+                state: req.body.state,
+            }, {
+                where: {
+                    id: id
+                }
+            });
+        } else if (type == "Sensor") {
+            await sensors.update({
+                temperature: req.body.temperature,
+                humidity: req.body.humidity
+            }, {
+                where: {
+                    id: id
+                }
+            });
+        }
+        res.send({ status: 0, message: '设置成功' });
     }
     // exports.regUser = async(req, res) => {
     //     console.log("regUser" + req.body.username + req.body.password);
